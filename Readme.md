@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Айдар Шакиров](https://up.htmlacademy.ru/javascript/21/user/79435).
-* Наставник: `Неизвестно`.
+* Наставник: `Ирина Захарова`.
 
 ---
 
