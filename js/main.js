@@ -2,12 +2,12 @@
 
 // ширина и высота метки
 
-const pinWidth = 156;
-const pinHeight = 156;
+const PIN_WIDTH = 50;
+const PIN_HEIGHT = 70;
 // пределы положения метки на карте
-const minY = 130;
-const maxY = 630;
-const mapWidth = document.querySelector(`.map`).clientWidth;
+const MIN_Y = 130;
+const MAX_Y = 630;
+const MAP_WIDTH = document.querySelector(`.map`).clientWidth;
 
 
 // функция для выборки координат метки
@@ -42,8 +42,8 @@ function getArrayCart() {
     Cart.offer.features = arrayFeatures[Math.floor(Math.random() * arrayFeatures.length)];
     Cart.offer.description = `Описание`;
     Cart.offer.photos = ArrayPhotosUrl;
-    Cart.location.x = getRandomСoordinates(0, mapWidth);
-    Cart.location.y = getRandomСoordinates(minY, maxY);
+    Cart.location.x = getRandomСoordinates(0, MAP_WIDTH);
+    Cart.location.y = getRandomСoordinates(MIN_Y, MAX_Y);
 
     ArrayCart.push(Cart);// заполняем массив
   }
@@ -64,7 +64,7 @@ function createPin(pinData) {
   const pinElement = pinTemplate.cloneNode(true);
   pinElement.querySelector(`img`).src = pinData.author.avatar;
   pinElement.querySelector(`img`).alt = pinData.offer.title;
-  pinElement.style = `left:` + (pinData.location.x + pinWidth) + `px;` + `top:` + (pinData.location.y + pinHeight) + `px;`;
+  pinElement.style = `left:` + (pinData.location.x - PIN_WIDTH / 2) + `px;` + `top:` + (pinData.location.y - PIN_HEIGHT) + `px;`;
   return pinElement;
 }
 
