@@ -1,131 +1,128 @@
 'use strict';
 
 // ширина и высота метки
-
 const PIN_WIDTH = 50;
 const PIN_HEIGHT = 70;
 // пределы положения метки на карте
 const MIN_Y = 130;
 const MAX_Y = 630;
-let mapWidth = document.querySelector(`.map`).clientWidth;
-
-
-// функция для выборки координат метки
-function getRandomСoordinates(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min; //  Максимум и минимум включаются
-}
-//
-// функция создания массива обектов с данными
-
-function getArrayCart() {
-  let ArrayCart = [];
-  let arrayType = [`palace`, `flat`, `house`, `bungalow`];
-  let arrayCheckin = [`12:00`, `13:00`, `14:00`];
-  let arrayFeatures = [`wifi`, `dishwasher`, `parking`, `washer`, `elevator`, `conditioner`];
-  let ArrayPhotosUrl = [`http://o0.github.io/assets/images/tokyo/hotel1.jpg`,
-    `http://o0.github.io/assets/images/tokyo/hotel2.jpg`,
-    `http://o0.github.io/assets/images/tokyo/hotel3.jpg`];
-
-  for (let i = 0; i < 8; i++) {
-    let Cart = {author: {}, offer: {}, location: {}};
-    Cart.author.avatar = `img/avatars/user` + `0` + (i + 1) + `.png`;
-    Cart.offer.title = `Заголовок`;
-    Cart.offer.adress = `600, 350`;
-    Cart.offer.price = `350`;
-    Cart.offer.type = arrayType[Math.floor(Math.random() * arrayType.length)];
-    Cart.offer.rooms = 2;
-    Cart.offer.guests = 3;
-    Cart.offer.checkin = arrayCheckin[Math.floor(Math.random() * arrayCheckin.length)];
-    Cart.offer.checkout = arrayCheckin[Math.floor(Math.random() * arrayCheckin.length)];
-    Cart.offer.features = arrayFeatures[Math.floor(Math.random() * arrayFeatures.length)];
-    Cart.offer.description = `Описание`;
-    Cart.offer.photos = ArrayPhotosUrl;
-    Cart.location.x = getRandomСoordinates(0, mapWidth);
-    Cart.location.y = getRandomСoordinates(MIN_Y, MAX_Y);
-
-    ArrayCart.push(Cart);// заполняем массив
-  }
-  return ArrayCart;
-}
-
-let arrayCart = getArrayCart();
 
 // временно удаляем класс
 let map = document.querySelector(`.map`);
 map.classList.remove(`map--faded`);
 
-// нахождение шаблона с метками
-let pinTemplate = document.querySelector(`#pin`).content.querySelector(`.map__pin`);
+// функция создания массива обектов с данными
+function getArrayCart() {
+  // функция для выборки координат метки
+  function getRandom(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min; //  Максимум и минимум включаются
+  }
+  const mapWidth = document.querySelector(`.map`).clientWidth;
+  let arrayCard = [];
+  let arrayType = [`palace`, `flat`, `house`, `bungalow`];
+  let arrayCheckin = [`12:00`, `13:00`, `14:00`];
+  let arrayFeatures = [`wifi`, `dishwasher`, `parking`, `washer`, `elevator`, `conditioner`];
+  let arrayPhotosUrl = [`http://o0.github.io/assets/images/tokyo/hotel1.jpg`,
+    `http://o0.github.io/assets/images/tokyo/hotel2.jpg`,
+    `http://o0.github.io/assets/images/tokyo/hotel3.jpg`];
 
-// функция для создания пина
-function createPin(pinData) {
-  const pinElement = pinTemplate.cloneNode(true);
-  pinElement.querySelector(`img`).src = pinData.author.avatar;
-  pinElement.querySelector(`img`).alt = pinData.offer.title;
-  pinElement.style = `left:` + (pinData.location.x - PIN_WIDTH / 2) + `px;` + `top:` + (pinData.location.y - PIN_HEIGHT) + `px;`;
-  return pinElement;
+  for (let i = 0; i < 8; i++) {
+    let card = {author: {}, offer: {}, location: {}};
+    card.author.avatar = `img/avatars/user` + `0` + (i + 1) + `.png`;
+    card.offer.title = `Заголовок`;
+    card.offer.adress = `600, 350`;
+    card.offer.price = `350`;
+    card.offer.type = arrayType[Math.floor(Math.random() * arrayType.length)];
+    card.offer.rooms = 2;
+    card.offer.guests = 3;
+    card.offer.checkin = arrayCheckin[Math.floor(Math.random() * arrayCheckin.length)];
+    card.offer.checkout = arrayCheckin[Math.floor(Math.random() * arrayCheckin.length)];
+    card.offer.features = arrayFeatures[Math.floor(Math.random() * arrayFeatures.length)];
+    card.offer.description = `Описание`;
+    card.offer.photos = arrayPhotosUrl.slice(0, getRandom(1, arrayPhotosUrl.length));
+    card.location.x = getRandom(0, mapWidth);
+    card.location.y = getRandom(MIN_Y, MAX_Y);
+
+    arrayCard.push(card);// заполняем массив
+  }
+  return arrayCard;
 }
 
 // функция для вставки готовых пинов в разметку
-function insertTemplatePin() {
+function insertPins(data) {
+  // нахождение шаблона с метками
+  let pinTemplate = document.querySelector(`#pin`).content.querySelector(`.map__pin`);
+
+// функция для создания пина
+  function createPin(pinData) {
+    const pinElement = pinTemplate.cloneNode(true);
+    pinElement.querySelector(`img`).src = pinData.author.avatar;
+    pinElement.querySelector(`img`).alt = pinData.offer.title;
+    pinElement.style = `left:` + (pinData.location.x - PIN_WIDTH / 2) + `px;` + `top:` + (pinData.location.y - PIN_HEIGHT) + `px;`;
+    return pinElement;
+  }
+
   let mapPinTemplate = document.querySelector(`.map__pins`);
   let pins = document.createDocumentFragment();
-  for (let i = 0; i < arrayCart.length; i++) {
-    const pin = createPin(arrayCart[i]);
+  for (let i = 0; i < data.length; i++) {
+    const pin = createPin(data[i]);
     pins.appendChild(pin);
   }
   mapPinTemplate.appendChild(pins);
 }
 
-insertTemplatePin();
-
-// находим элемент перед которым нужно вставить карточки обявления
-let mapFiltersContainer = map.querySelector(`.map__filters-container`);
-
 // функция для заполнения данными карточки обявления
-function insertDataCard() {
-  let cardTemplate = document.querySelector(`#card`).content.querySelector(`.map__card`);
-  let dataCardTemplate = document.createDocumentFragment();
-  
-  // создаем словарь
-  let offerType = {ftat: 'Квартира', house: 'Дом', palace: "Дворец", bungalow: "Бунгало"};
-  
-  // функция для вставки src для картинок
-  function insertSrcImg(arrayScrImg) {
-    let popupPhotos = cardTemplate.querySelector(`.popup__photos`);
-    let imgScr = document.createDocumentFragment();
-    let test = document.querySelector(`#card`).content.querySelector(`.popup__photo`);
+function insertCard(cardData) {
+  const mapFiltersContainer = map.querySelector(`.map__filters-container`);
+  const cardTemplate = document.querySelector(`#card`).content.querySelector(`.map__card`);
 
-    for(let i = 0; i < arrayScrImg.length; i++) {
-      let imgTemplate = test.cloneNode(true);
-      imgTemplate.src = arrayScrImg[i];
-      imgScr.appendChild(imgTemplate);
+  // словарь для сопоставления данных из API с отображаемыми названиями
+  const offerType = {
+    flat: `Квартира`,
+    house: `Дом`,
+    palace: `Дворец`,
+    bungalow: `Бунгало`
+  };
+
+  // функция создания картинок для карточки
+  function createCardImages(photos) {
+    const fragment = document.createDocumentFragment();
+    const template = document.querySelector(`#card`).content.querySelector(`.popup__photo`);
+    for (let i = 0; i < photos.length; i++) {
+      let imgTemplate = template.cloneNode(true);
+      imgTemplate.src = photos[i];
+      fragment.appendChild(imgTemplate);
     }
-
-    popupPhotos.appendChild(imgScr);
-    console.log(popupPhotos);
+    return fragment;
   }
 
-  for (let i = 0; i < arrayCart.length; i++) {
+  function createCard(data) {
     let cardElement = cardTemplate.cloneNode(true);
-    cardElement.querySelector(`.popup__title`).textContent = arrayCart[i].offer.title;
-    cardElement.querySelector(`.popup__text--address`).textContent = arrayCart[i].offer.adress;
-    cardElement.querySelector(`.popup__text--price`).textContent = arrayCart[i].offer.price +'₽/ночь';
-    cardElement.querySelector(`.popup__text--capacity`).textContent = arrayCart[i].offer.rooms + " комнаты для " + arrayCart[i].offer.guests + " гостей";
-    cardElement.querySelector(`.popup__text--time`).textContent = "Заезд после " + arrayCart[i].offer.checkin + " выезд до " + arrayCart[i].offer.checkout;
-    cardElement.querySelector(`.popup__features`).textContent = arrayCart[i].offer.features;
-    cardElement.querySelector(`.popup__description`).textContent = arrayCart[i].offer.description;
-    cardElement.querySelector(`.popup__avatar`).src = arrayCart[i].author.avatar;
-    cardElement.querySelector(`.popup__type`).textContent = offerType[arrayCart[i].offer.type];
-    insertSrcImg(arrayCart[i].offer.photos);
 
-    dataCardTemplate.appendChild(cardElement);
+    // Удаляем фото вёрстки
+    const photoElement = cardElement.querySelector('.popup__photos').querySelector('.popup__photo');
+    cardElement.querySelector('.popup__photos').removeChild(photoElement);
+
+    cardElement.querySelector(`.popup__title`).textContent = data.offer.title;
+    cardElement.querySelector(`.popup__text--address`).textContent = data.offer.adress;
+    cardElement.querySelector(`.popup__text--price`).textContent = data.offer.price + `/ночь`;
+    cardElement.querySelector(`.popup__text--capacity`).textContent = data.offer.rooms + ` комнаты для ` + data.offer.guests + ` гостей`;
+    cardElement.querySelector(`.popup__text--time`).textContent = `заезд после ` + data.offer.checkin + `, выезд до ` + data.offer.checkout;
+    cardElement.querySelector(`.popup__features`).textContent = data.offer.features;
+    cardElement.querySelector(`.popup__description`).textContent = data.offer.description;
+    cardElement.querySelector(`.popup__avatar`).src = data.author.avatar;
+    cardElement.querySelector(`.popup__type`).textContent = offerType[data.offer.type];
+    cardElement.querySelector(`.popup__photos`).appendChild(createCardImages(data.offer.photos));
+    return cardElement;
   }
-  console.log(dataCardTemplate);
-  //mapFiltersContainer.insertAdjacentHTML(beforeBegin, dataCardTemplate);
+
+  const card = createCard(cardData);
+  map.insertBefore(card, mapFiltersContainer);
 }
 
-insertDataCard();
+const arrayCart = getArrayCart();
+insertPins(arrayCart);
+insertCard(arrayCart[0]);
 
