@@ -32,14 +32,14 @@ function getArrayCart() {
     let card = {author: {}, offer: {}, location: {}};
     card.author.avatar = `img/avatars/user` + `0` + (i + 1) + `.png`;
     card.offer.title = `Заголовок`;
-    card.offer.adress = `600, 350`;
+    card.offer.adress = getRandom(0, mapWidth) + ` , ` + getRandom(MIN_Y, MAX_Y);
     card.offer.price = `350`;
     card.offer.type = arrayType[Math.floor(Math.random() * arrayType.length)];
     card.offer.rooms = 2;
     card.offer.guests = 3;
     card.offer.checkin = arrayCheckin[Math.floor(Math.random() * arrayCheckin.length)];
     card.offer.checkout = arrayCheckin[Math.floor(Math.random() * arrayCheckin.length)];
-    card.offer.features = arrayFeatures[Math.floor(Math.random() * arrayFeatures.length)];
+    card.offer.features = arrayFeatures.slice(0, getRandom(1, arrayFeatures.length));
     card.offer.description = `Описание`;
     card.offer.photos = arrayPhotosUrl.slice(0, getRandom(1, arrayPhotosUrl.length));
     card.location.x = getRandom(0, mapWidth);
@@ -55,7 +55,7 @@ function insertPins(data) {
   // нахождение шаблона с метками
   let pinTemplate = document.querySelector(`#pin`).content.querySelector(`.map__pin`);
 
-// функция для создания пина
+  // функция для создания пина
   function createPin(pinData) {
     const pinElement = pinTemplate.cloneNode(true);
     pinElement.querySelector(`img`).src = pinData.author.avatar;
@@ -102,8 +102,8 @@ function insertCard(cardData) {
     let cardElement = cardTemplate.cloneNode(true);
 
     // Удаляем фото вёрстки
-    const photoElement = cardElement.querySelector('.popup__photos').querySelector('.popup__photo');
-    cardElement.querySelector('.popup__photos').removeChild(photoElement);
+    const photoElement = cardElement.querySelector(`.popup__photos`).querySelector(`.popup__photo`);
+    cardElement.querySelector(`.popup__photos`).removeChild(photoElement);
 
     cardElement.querySelector(`.popup__title`).textContent = data.offer.title;
     cardElement.querySelector(`.popup__text--address`).textContent = data.offer.adress;
