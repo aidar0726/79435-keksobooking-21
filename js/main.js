@@ -98,23 +98,38 @@ function insertCard(cardData) {
     return fragment;
   }
 
+  // функция создания доступных удобств в карточке обявлений
+  function createCardFeatures(features) {
+    const fragmentLi = document.createDocumentFragment();
+    for (let i = 0; i < features.length; i++) {
+      const tagLi = document.createElement(`li`);
+      tagLi.className = `popup__feature popup__feature--` + features[i];
+      fragmentLi.appendChild(tagLi);
+    }
+    return fragmentLi;
+  }
+
   function createCard(data) {
     let cardElement = cardTemplate.cloneNode(true);
 
-    // Удаляем фото вёрстки
+    // Удаляем фото вёрстки и стоковый список удобств
     const photoElement = cardElement.querySelector(`.popup__photos`).querySelector(`.popup__photo`);
     cardElement.querySelector(`.popup__photos`).removeChild(photoElement);
+
+    // Удаляем стоковый список удобств в верстке
+    cardElement.querySelector(`.popup__features`).innerHTML = ``;
 
     cardElement.querySelector(`.popup__title`).textContent = data.offer.title;
     cardElement.querySelector(`.popup__text--address`).textContent = data.offer.adress;
     cardElement.querySelector(`.popup__text--price`).textContent = data.offer.price + `/ночь`;
     cardElement.querySelector(`.popup__text--capacity`).textContent = data.offer.rooms + ` комнаты для ` + data.offer.guests + ` гостей`;
     cardElement.querySelector(`.popup__text--time`).textContent = `заезд после ` + data.offer.checkin + `, выезд до ` + data.offer.checkout;
-    cardElement.querySelector(`.popup__features`).textContent = data.offer.features;
+    cardElement.querySelector(`.popup__features`).appendChild(createCardFeatures(data.offer.features));
     cardElement.querySelector(`.popup__description`).textContent = data.offer.description;
     cardElement.querySelector(`.popup__avatar`).src = data.author.avatar;
     cardElement.querySelector(`.popup__type`).textContent = offerType[data.offer.type];
     cardElement.querySelector(`.popup__photos`).appendChild(createCardImages(data.offer.photos));
+
     return cardElement;
   }
 
@@ -125,4 +140,64 @@ function insertCard(cardData) {
 const arrayCart = getArrayCart();
 insertPins(arrayCart);
 insertCard(arrayCart[0]);
+
+
+// функция для переключения состояния карты(из активного в активное и наборот);
+function switchMapState(flag) {
+  const adForm = document.querySelector(`.ad-form`);
+  const inputForm = document.querySelectorAll(`fieldset`);
+
+  if (flag) {
+    adForm.classList.add(`ad-form--disabled`);
+    map.classList.add(`map--faded`);
+
+    // делаем все поля формы неактивными
+    for (let i = 0; i < inputForm.length; i++) {
+      inputForm[i].setAttribute(`disabled`, `disabled`);
+    }
+
+
+  } else {
+    adForm.classList.remove(`ad-form--disabled`);
+    map.classList.remove(`map--faded`);
+    // делаем все поля формы активными
+    for (let i = 0; i < inputForm.length; i++) {
+      inputForm[i].removeAttribute(`disabled`);
+    }
+
+  }
+
+}
+
+switchMapState(true);
+
+const mapPin = document.querySelector(`.map__pin--main`);
+const MAPPIN_WIDTH = 65;
+const MAPPIN_HEIGHT = 65;
+// назначаем обработчики события на главную метку для активации формы
+mapPin.addEventListener(`mousedown`, function (evt) {
+  if (evt.which === 1) {
+    switchMapState(false);
+  }
+});
+
+mapPin.addEventListener(`keydown`, function (evt) {
+  if (evt.key === `Enter`) {
+    switchMapState(false);
+  }
+
+});
+
+// находим и записываем координаты главного пина на карте в адрес формы
+
+// функция для расчета координат главного пина при загрузке страницы
+function findingСoordinatesPin() {
+  let y = Math.round(mapPin.getBoundingClientRect().top + MAPPIN_HEIGHT / 2);
+  let x = Math.round(mapPin.getBoundingClientRect().left + MAPPIN_WIDTH / 2);
+
+  return x + ` ; ` + y;
+}
+
+const address = document.querySelector(`#address`);
+address.value = findingСoordinatesPin();
 
