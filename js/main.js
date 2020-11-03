@@ -202,18 +202,20 @@ function findPinCoordinates() {
 }
 
 const address = document.querySelector(`#address`);
-address.setAttribute('readonly', 'true');
+address.setAttribute(`readonly`, `true`);
 address.value = findPinCoordinates();
 
 // todo: ВАЛИДАЦИЯ ФОРМЫ
 
-const form = document.querySelector('.ad-form');
-const sendFormButton = document.querySelector('.ad-form__submit');
-const title = document.querySelector('#title');
-const price = document.querySelector('#price');
-const type = document.querySelector('#type');
-const roomNumber = document.querySelector('#room_number');
-const capacity = document.querySelector('#capacity');
+const form = document.querySelector(`.ad-form`);
+const sendFormButton = document.querySelector(`.ad-form__submit`);
+const title = document.querySelector(`#title`);
+const price = document.querySelector(`#price`);
+const type = document.querySelector(`#type`);
+const roomNumber = document.querySelector(`#room_number`);
+const capacity = document.querySelector(`#capacity`);
+const timeIn = document.querySelector(`#timein`);
+const timeOut = document.querySelector(`#timeout`);
 
 // При каждом изменении значения поля type (Тип жилья)
 // вызывается эта функция, в ней меняются атрибуты min и placeholder для поля price (Цена за ночь)
@@ -223,62 +225,69 @@ const setMinPrice = (typeValue) => {
     flat: 1000,
     house: 5000,
     palace: 10000
-  }
-  price.setAttribute('min', prices[typeValue])
-  price.setAttribute('placeholder', prices[typeValue])
-}
+  };
+  price.setAttribute(`min`, prices[typeValue]);
+  price.setAttribute(`placeholder`, prices[typeValue]);
+};
 
 // Проверка соответствия выбранного значения поля Количество комнат с полем Количество мест
 const checkRoomsAndCapacityAccordance = () => {
   const roomNumberValue = roomNumber.value;
   const capacityValue = capacity.value;
   const accordance = {
-    '1': ['1'],
-    '2': ['1', '2'],
-    '3': ['1', '2', '3'],
-    '100': ['0']
-  }
+    '1': [`1`],
+    '2': [`1`, `2`],
+    '3': [`1`, `2`, `3`],
+    '100': [`0`]
+  };
   // метод includes доступен начиная с ES2016 - https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Array/includes
   const isValid = accordance[roomNumberValue].includes(capacityValue);
   if (!isValid) {
     // Если не соответствует, вызываем ошибку
-    capacity.setCustomValidity('Кол-во гостей превышает кол-во выбранных комнат')
+    capacity.setCustomValidity(`Кол-во гостей превышает кол-во выбранных комнат`);
   } else {
     // Если соответсвует, ошибку обязательно нужно отменить, самостоятельно она не отменится
-    capacity.setCustomValidity('')
+    capacity.setCustomValidity(``);
   }
   // Передаём булеву isValid в свойство validity объекта, чтобы в checkValidity обрабатывать это поле также, как и другие
   return {
-    validity: isValid
-  }
-}
+    valid: isValid
+  };
+};
 
 // Проверка обязательных полей, а также полей Кол-во комнат и Кол-во мест
 const checkValidity = () => {
-  const fields = [title, price, checkRoomsAndCapacityAccordance()]
+  const fields = [title.validity, price.validity, checkRoomsAndCapacityAccordance()];
   // метод every доступен начиная с ES2016 - https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Array/every
-  const isValid = fields.every(field => field.validity)
+  const isValid = fields.every((field) => field.valid);
   return isValid;
-}
+};
 
 // Изменение атрибутов для поля Цена при изменении типа жилья
-type.addEventListener('change', function (e) {
-  setMinPrice(e.target.value)
-})
+type.addEventListener(`change`, function (e) {
+  setMinPrice(e.target.value);
+});
+
+// проверка синхронизации даты въезда и даты выезда
+timeIn.addEventListener(`change`, function (e) {
+  timeOut.value = e.target.value;
+});
+
+timeOut.addEventListener(`change`, function (e) {
+  timeIn.value = e.target.value;
+});
 
 // Отмена отправки формы по умолчанию
-form.addEventListener('submit', function (e) {
+form.addEventListener(`submit`, function (e) {
   e.preventDefault();
-})
+});
 
 // Проверка полей по клику + отправка данных
-sendFormButton.addEventListener('click', function () {
+sendFormButton.addEventListener(`click`, function () {
   const isValid = checkValidity();
-  if (isValid) form.submit()
-})
-
-// TODO: нужно сделать также пункт 3.5 ТЗ: Поля «Время заезда» и «Время выезда» синхронизированы:
-//  при изменении значения одного поля, во втором выделяется соответствующее ему. Например, если время
-//  заезда указано «после 14», то время выезда будет равно «до 14» и наоборот.
+  if (isValid) {
+    form.submit();
+  }
+});
 
 
