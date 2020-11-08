@@ -54,6 +54,9 @@ function getArrayCart() {
   }
   return arrayCard;
 }
+const card = createCard();
+const mapFiltersContainer = map.querySelector(`.map__filters-container`);
+map.insertBefore(card, mapFiltersContainer);
 
 // функция для вставки готовых пинов в разметку
 function insertPins(data) {
@@ -63,6 +66,17 @@ function insertPins(data) {
   // функция для создания пина
   function createPin(pinData) {
     const pinElement = pinTemplate.cloneNode(true);
+    pinElement.addEventListener(`click`, function () {
+      card.classList.remove(`hidden`);
+      insertCard(pinData, card);
+    });
+
+    pinElement.addEventListener(`keydown`, function (evt) {
+      if (evt.key === `Enter`) {
+        card.classList.remove(`hidden`);
+      }
+    });
+
     pinElement.querySelector(`img`).src = pinData.author.avatar;
     pinElement.querySelector(`img`).alt = pinData.offer.title;
     pinElement.style = `left:` + (pinData.location.x - PIN_WIDTH / 2) + `px;` + `top:` + (pinData.location.y - PIN_HEIGHT) + `px;`;
@@ -78,10 +92,33 @@ function insertPins(data) {
   mapPinTemplate.appendChild(pins);
 }
 
-// функция для заполнения данными карточки обявления
-function insertCard(cardData) {
-  const mapFiltersContainer = map.querySelector(`.map__filters-container`);
+function createCard() {
   const cardTemplate = document.querySelector(`#card`).content.querySelector(`.map__card`);
+  let cardElement = cardTemplate.cloneNode(true);
+  const popupClose = cardElement.querySelector(`.popup__close`);
+  popupClose.addEventListener(`click`, function () {
+    cardElement.classList.add(`hidden`);
+  });
+
+  popupClose.addEventListener(`keydown`, function (evt) {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      cardElement.classList.add(`hidden`);
+    }
+  });
+
+  document.addEventListener(`keydown`, function (evt) {
+
+    if ((evt.key === `Escape` || evt.key === `Esc`) && !cardElement.classList.contains(`hidden`)) {
+      cardElement.classList.add(`hidden`);
+    }
+  });
+
+  return cardElement;
+}
+
+
+// функция для заполнения данными карточки обявления
+function insertCard(data, cardElement) {
 
   // словарь для сопоставления данных из API с отображаемыми названиями
   const offerType = {
@@ -114,37 +151,28 @@ function insertCard(cardData) {
     return fragmentLi;
   }
 
-  function createCard(data) {
-    let cardElement = cardTemplate.cloneNode(true);
 
-    // Удаляем фото вёрстки и стоковый список удобств
-    const photoElement = cardElement.querySelector(`.popup__photos`).querySelector(`.popup__photo`);
-    cardElement.querySelector(`.popup__photos`).removeChild(photoElement);
+  // Удаляем фото вёрстки и стоковый список удобств
+  const photoElement = cardElement.querySelector(`.popup__photos`).querySelector(`.popup__photo`);
+  cardElement.querySelector(`.popup__photos`).removeChild(photoElement);
 
-    // Удаляем стоковый список удобств в верстке
-    cardElement.querySelector(`.popup__features`).innerHTML = ``;
+  // Удаляем стоковый список удобств в верстке
+  cardElement.querySelector(`.popup__features`).innerHTML = ``;
 
-    cardElement.querySelector(`.popup__title`).textContent = data.offer.title;
-    cardElement.querySelector(`.popup__text--address`).textContent = data.offer.adress;
-    cardElement.querySelector(`.popup__text--price`).textContent = data.offer.price + `/ночь`;
-    cardElement.querySelector(`.popup__text--capacity`).textContent = data.offer.rooms + ` комнаты для ` + data.offer.guests + ` гостей`;
-    cardElement.querySelector(`.popup__text--time`).textContent = `заезд после ` + data.offer.checkin + `, выезд до ` + data.offer.checkout;
-    cardElement.querySelector(`.popup__features`).appendChild(createCardFeatures(data.offer.features));
-    cardElement.querySelector(`.popup__description`).textContent = data.offer.description;
-    cardElement.querySelector(`.popup__avatar`).src = data.author.avatar;
-    cardElement.querySelector(`.popup__type`).textContent = offerType[data.offer.type];
-    cardElement.querySelector(`.popup__photos`).appendChild(createCardImages(data.offer.photos));
-
-    return cardElement;
-  }
-
-  const card = createCard(cardData);
-  map.insertBefore(card, mapFiltersContainer);
+  cardElement.querySelector(`.popup__title`).textContent = data.offer.title;
+  cardElement.querySelector(`.popup__text--address`).textContent = data.offer.adress;
+  cardElement.querySelector(`.popup__text--price`).textContent = data.offer.price + `/ночь`;
+  cardElement.querySelector(`.popup__text--capacity`).textContent = data.offer.rooms + ` комнаты для ` + data.offer.guests + ` гостей`;
+  cardElement.querySelector(`.popup__text--time`).textContent = `заезд после ` + data.offer.checkin + `, выезд до ` + data.offer.checkout;
+  cardElement.querySelector(`.popup__features`).appendChild(createCardFeatures(data.offer.features));
+  cardElement.querySelector(`.popup__description`).textContent = data.offer.description;
+  cardElement.querySelector(`.popup__avatar`).src = data.author.avatar;
+  cardElement.querySelector(`.popup__type`).textContent = offerType[data.offer.type];
+  cardElement.querySelector(`.popup__photos`).appendChild(createCardImages(data.offer.photos));
 }
 
 const arrayCart = getArrayCart();
 insertPins(arrayCart);
-insertCard(arrayCart[0]);
 
 
 // функция для переключения состояния карты(из активного в активное и наборот);
@@ -289,5 +317,3 @@ sendFormButton.addEventListener(`click`, function () {
     form.submit();
   }
 });
-
-
